@@ -24,7 +24,7 @@ public class MovieController {
         }
 
         // for deleting movie
-        @PostMapping("/delete")
+        @DeleteMapping("/delete")
         public String deleteMovie() {
             return "Movie deleted";
         }
