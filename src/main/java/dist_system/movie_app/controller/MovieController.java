@@ -41,15 +41,16 @@ public class MovieController {
     }
 
     // for adding movie
-    @PostMapping("/add")
-    public String addMovie() {
-        return "Movie added";
+    @PostMapping("/add/{id}")
+    public String addMovie(@PathVariable String id) throws JSONException, IOException, InterruptedException {
+        String movie = movieService.getMovieById(id);
+        return movieService.saveMovie(movie);
     }
 
     // for adding review
-    @PostMapping("/add/review")
-    public String addReview() {
-        return "Review added";
+    @PostMapping("/add/review/{id}")
+    public String addReview(@PathVariable String id, @RequestBody String review) {
+        return movieService.addReview(id, review);
     }
 
     // for deleting movie

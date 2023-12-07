@@ -43,5 +43,15 @@ public class MovieService {
             return "Movie not found";
         }
     }
+
+    public String saveMovie(String movie) {
+        System.out.println("Saved movie: " + movie);
+        return "Movie saved";
+    }
+
+    public String addReview(String id, String review) {
+        System.out.println("Added review for movie with id: " + id + "\nReview: " + review);
+        return "Review added";
+    }
 }
 
