@@ -1,4 +1,4 @@
-package dist_system.movie_app.pojo;
+package dist_system.movie_app.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

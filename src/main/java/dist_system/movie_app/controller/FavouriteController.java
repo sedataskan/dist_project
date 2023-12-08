@@ -1,6 +1,6 @@
 package dist_system.movie_app.controller;
 
-import dist_system.movie_app.pojo.FavouriteRequest;
+import dist_system.movie_app.dto.FavouriteRequest;
 import dist_system.movie_app.service.FavouriteService;
 import dist_system.movie_app.service.MovieService;
 import org.json.JSONException;
