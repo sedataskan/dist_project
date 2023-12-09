@@ -33,7 +33,7 @@ public class MovieService {
 
         // Extract movie information
         JSONArray resultsArray = jsonResponse.getJSONArray("results");
-        if (resultsArray.length() > 0) {
+        if (!resultsArray.isEmpty()) {
             JSONObject firstResult = resultsArray.getJSONObject(0);
             String movieTitle = firstResult.getString("original_title");
             String movieInfo = firstResult.getString("overview");

@@ -1,5 +1,6 @@
 package dist_system.movie_app.controller;
 
+import dist_system.movie_app.dto.ReviewRequest;
 import dist_system.movie_app.service.MovieService;
 import org.json.JSONException;
 import org.springframework.web.bind.annotation.*;
@@ -35,26 +36,26 @@ public class MovieController {
     }
 
     // for adding movie rating
-    @PostMapping("/add/rating")
+    @PostMapping("/addRating")
     public String addRating() {
         return "Rating added";
     }
 
     // for adding movie
-    @PostMapping("/add/{id}")
+    @PostMapping("/addMovie/{id}")
     public String addMovie(@PathVariable String id) throws JSONException, IOException, InterruptedException {
         String movie = movieService.getMovieById(id);
         return movieService.saveMovie(movie);
     }
 
     // for adding review
-    @PostMapping("/add/review/{id}")
-    public String addReview(@PathVariable String id, @RequestBody String review) {
-        return movieService.addReview(id, review);
+    @PostMapping("/addReview/{id}")
+    public String addReview(@PathVariable String id, @RequestBody ReviewRequest Review){
+        return movieService.addReview(id, Review.getReview());
     }
 
     // for deleting movie
-    @DeleteMapping("/delete")
+    @DeleteMapping("/deleteMovie")
     public String deleteMovie() {
         return "Movie deleted";
     }
