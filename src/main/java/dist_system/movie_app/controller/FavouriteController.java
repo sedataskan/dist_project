@@ -20,7 +20,7 @@ public class FavouriteController {
     }
 
     // adding movie to fav list
-    @PostMapping("/add")
+    @PostMapping("/addFavourite")
     public String addFavourite(@RequestBody FavouriteRequest request){
         try {
             String movie = movieService.getMovieById(request.getId());
@@ -31,7 +31,7 @@ public class FavouriteController {
     }
 
     // deleting movie from fav list
-    @DeleteMapping("/delete")
+    @DeleteMapping("/deleteFavourite")
     public String deleteFavourite(@RequestBody FavouriteRequest request){
         try {
             String movie = movieService.getMovieById(request.getId());
