@@ -1,20 +1,32 @@
 package dist_system.movie_app.controller;
 
+import dist_system.movie_app.dto.AuthenticationResponse;
+import dist_system.movie_app.dto.LoginRequest;
+import dist_system.movie_app.dto.RegisterRequest;
+import dist_system.movie_app.service.AuthenticationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("app/v1/auth")
+@RequiredArgsConstructor
 public class AuthenticationController {
 
-    // login
-    @RequestMapping("/login")
-    public String login() {
-        return "Login";
-    }
+    private final AuthenticationService service;
 
     // register
-    @RequestMapping("/register")
-    public String register() {
-        return "Register";
+    @PostMapping("/register")
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest registerRequest) {
+        return ResponseEntity.ok(service.register(registerRequest));
+    }
+
+    // login
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest) {
+        return ResponseEntity.ok(service.login(loginRequest));
     }
 }

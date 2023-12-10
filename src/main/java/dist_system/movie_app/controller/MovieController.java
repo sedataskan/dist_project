@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/movie")
+@RequestMapping("app/v1/movie")
 public class MovieController {
 
     //created movieService object to use its methods in controller with constructor injection

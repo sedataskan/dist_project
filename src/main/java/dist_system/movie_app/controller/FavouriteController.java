@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/favourites")
+@RequestMapping("app/v1/favourites")
 public class FavouriteController {
 
     private final FavouriteService favouriteService;
