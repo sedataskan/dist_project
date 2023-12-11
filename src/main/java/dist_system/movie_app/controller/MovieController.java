@@ -2,7 +2,9 @@ package dist_system.movie_app.controller;
 
 import dist_system.movie_app.dto.ReviewRequest;
 import dist_system.movie_app.service.MovieService;
+import dist_system.movie_app.user.User;
 import org.json.JSONException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
@@ -41,11 +43,10 @@ public class MovieController {
         return "Rating added";
     }
 
-    // for adding movie
+    // for adding movie to user
     @PostMapping("/addMovie/{id}")
-    public String addMovie(@PathVariable String id) throws JSONException, IOException, InterruptedException {
-        String movie = movieService.getMovieById(id);
-        return movieService.saveMovie(movie);
+    public String addMovie(@PathVariable String id, @AuthenticationPrincipal User user) throws JSONException, IOException, InterruptedException {
+        return movieService.saveMovie(id, user.getUsername());
     }
 
     // for adding review
