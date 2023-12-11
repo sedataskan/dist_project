@@ -4,7 +4,6 @@ import dist_system.movie_app.repository.UserRepository;
 import dist_system.movie_app.repository.UserMovieRepository;
 import dist_system.movie_app.user.User;
 import dist_system.movie_app.user.UserMovie;
-import jakarta.transaction.Transactional;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -1,6 +1,5 @@
 package dist_system.movie_app.controller;
 
-import dist_system.movie_app.dto.MovieRequest;
 import dist_system.movie_app.dto.ReviewRequest;
 import dist_system.movie_app.service.MovieService;
 import dist_system.movie_app.user.User;
