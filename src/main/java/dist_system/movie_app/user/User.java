@@ -9,8 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Data
 @Builder
@@ -22,7 +21,8 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private int id;
+
     private String username;
     private String password;
 
