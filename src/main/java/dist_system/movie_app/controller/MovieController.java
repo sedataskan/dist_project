@@ -1,12 +1,15 @@
 package dist_system.movie_app.controller;
 
 import dist_system.movie_app.dto.ReviewRequest;
+import dist_system.movie_app.model.BaseResponse;
 import dist_system.movie_app.service.MovieService;
 import dist_system.movie_app.user.User;
+import dist_system.movie_app.user.UserMovie;
 import org.json.JSONException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("app/v1/movie")
@@ -21,14 +24,18 @@ public class MovieController {
 
     // get movie by id with param
     @GetMapping("/{id}")
-    public String getMovieById(@PathVariable String id) throws IOException, InterruptedException, JSONException {
-        return movieService.getMovieById(id);
+    public BaseResponse<String> getMovieById(@PathVariable String id) throws IOException, InterruptedException, JSONException {
+        String movieName = movieService.getMovieById(id);
+        if (movieName == null) {
+            return new BaseResponse<>(false, "Movie has not been found", null);
+        }
+        return new BaseResponse<>(true, "Movie has been found", movieName);
     }
 
     // get all movies
     @GetMapping("/all")
-    public String getAllMovies() {
-        return "All movies";
+    public BaseResponse<List<UserMovie>> getAllMovies(@AuthenticationPrincipal User user) throws IOException, InterruptedException, JSONException {
+        return new BaseResponse<>(true, "Movies has been listed", movieService.getAllMovies(user.getUsername()));
     }
 
     // get ratings for movie with id
@@ -45,8 +52,12 @@ public class MovieController {
 
     // for adding movie to user
     @PostMapping("/addMovie/{id}")
-    public String addMovie(@PathVariable String id, @AuthenticationPrincipal User user) throws JSONException, IOException, InterruptedException {
-        return movieService.saveMovie(id, user.getUsername());
+    public BaseResponse<String> addMovie(@PathVariable String id, @AuthenticationPrincipal User user) throws JSONException, IOException, InterruptedException {
+        String message = movieService.saveMovie(id, user.getUsername());
+        if (message == null) {
+            return new BaseResponse<>(false, "Movie has not been found", null);
+        }
+        return new BaseResponse<>(true, "Process was successful", message);
     }
 
     // for adding review
@@ -56,9 +67,13 @@ public class MovieController {
     }
 
     // for deleting movie
-    @DeleteMapping("/deleteMovie")
-    public String deleteMovie() {
-        return "Movie deleted";
+    @DeleteMapping("/delete/{id}")
+    public BaseResponse<String> deleteMovie(@PathVariable String id, @AuthenticationPrincipal User user) {
+        String message = movieService.deleteMovie(id, user.getUsername());
+        if (message == null) {
+            return new BaseResponse<>(false, "Movie has not been found", null);
+        }
+        return new BaseResponse<>(true, "Movie has been deleted", message);
     }
 
 }
