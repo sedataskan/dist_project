@@ -12,13 +12,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name="user_movie")
-public class UserMovie {
+public class FavouriteMovie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
     private String username;
     private String movieName;
-    private Float rating;
-    private String review;
 }
