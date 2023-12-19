@@ -103,8 +103,23 @@ public class MovieService {
     }
 
     public String addReview(String id, String review) {
-        System.out.println("Added review for movie with id: " + id + "\nReview: " + review);
-        return "Review added";
+        Optional<UserMovie> userMovie = userMovieRepository.findById(id);
+        if (userMovie.isPresent()) {
+            userMovie.get().setReview(review);
+            userMovieRepository.save(userMovie.get());
+            return "Review added";
+        } else {
+            return null;
+        }
+    }
+
+    public String getReview(String id) {
+        Optional<UserMovie> userMovie = userMovieRepository.findById(id);
+        if (userMovie.isPresent()) {
+            return userMovie.get().getReview();
+        } else {
+            return null;
+        }
     }
 
     public String addRating(String id, Float rating, String username) {

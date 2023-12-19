@@ -58,6 +58,26 @@ public class MovieController {
         return new BaseResponse<>(true, "success", (Float) response);
     }
 
+    // for adding review
+    @PostMapping("/{id}/review")
+    public BaseResponse<String> addReview(@PathVariable String id, @RequestBody ReviewRequest Review){
+        String response = movieService.addReview(id, Review.getReview());
+        if (response == null) {
+            return new BaseResponse<>(false, "An unkown error occured", null);
+        }
+        return new BaseResponse<>(true, "success", response);
+    }
+
+    @GetMapping("/{id}/review")
+    public BaseResponse<String> getReview(@PathVariable String id) {
+        Object response = movieService.getReview(id);
+        if (response == null) {
+            return new BaseResponse<>(false, "Movie not found", null);
+        }
+        return new BaseResponse<>(true, "success", (String) response);
+    }
+
+
     // for adding movie to user
     @PostMapping("/addMovie/{id}")
     public BaseResponse<String> addMovie(@PathVariable String id, @AuthenticationPrincipal User user) throws JSONException, IOException, InterruptedException {
@@ -68,11 +88,6 @@ public class MovieController {
         return new BaseResponse<>(true, "Process was successful", message);
     }
 
-    // for adding review
-    @PostMapping("/addReview/{id}")
-    public String addReview(@PathVariable String id, @RequestBody ReviewRequest Review){
-        return movieService.addReview(id, Review.getReview());
-    }
 
     // for deleting movie
     @DeleteMapping("/delete/{id}")

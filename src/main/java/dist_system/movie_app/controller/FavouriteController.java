@@ -1,12 +1,17 @@
 package dist_system.movie_app.controller;
 
 import dist_system.movie_app.dto.FavouriteRequest;
+import dist_system.movie_app.model.BaseResponse;
 import dist_system.movie_app.service.FavouriteService;
 import dist_system.movie_app.service.MovieService;
+import dist_system.movie_app.user.FavouriteMovie;
+import dist_system.movie_app.user.User;
 import org.json.JSONException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("app/v1/favourites")
@@ -20,30 +25,34 @@ public class FavouriteController {
     }
 
     // adding movie to fav list
-    @PostMapping("/addFavourite")
-    public String addFavourite(@RequestBody FavouriteRequest request){
+    @PostMapping("/{movieID}")
+    public BaseResponse<String> addFavourite(@PathVariable String movieID, @AuthenticationPrincipal User user){
         try {
-            String movie = movieService.getMovieById(request.getId());
-            return favouriteService.saveFavourite(request.getId(), movie, request.getUserId());
+            String movie = movieService.getMovieById(movieID);
+            String response = favouriteService.saveFavourite(movie, user.getUsername());
+            if (response == null) {
+                return new BaseResponse<>(false, "An unkown error occured", null);
+            } else {
+                return new BaseResponse<>(true, "success", response);
+            }
         } catch (IOException | InterruptedException | JSONException e) {
             throw new RuntimeException(e);
         }
     }
 
     // deleting movie from fav list
-    @DeleteMapping("/deleteFavourite")
-    public String deleteFavourite(@RequestBody FavouriteRequest request){
-        try {
-            String movie = movieService.getMovieById(request.getId());
-            return favouriteService.deleteFavourite(movie, request.getUserId());
-        } catch (IOException | InterruptedException | JSONException e) {
-            throw new RuntimeException(e);
+    @DeleteMapping("/{id}")
+    public BaseResponse<String> deleteFavourite(@PathVariable String id, @AuthenticationPrincipal User user){
+        String response = favouriteService.deleteFavourite(id, user.getUsername());
+        if (response == null) {
+            return new BaseResponse<>(false, "An unkown error occured", null);
         }
+        return new BaseResponse<>(true, "success", response);
     }
 
     // get all fav list
-    @GetMapping("/{userId}/allFavourites")
-    public String getAllFavourites(@PathVariable String userId) {
-        return favouriteService.getAllFavourites(userId);
+    @GetMapping("/all/")
+    public BaseResponse<List<FavouriteMovie>> getAllFavourites(@AuthenticationPrincipal User user) {
+        return new BaseResponse<>(true, "Favourites has been listed", favouriteService.getAllFavourites(user));
     }
 }

@@ -1,37 +1,53 @@
 package dist_system.movie_app.service;
 
+import dist_system.movie_app.repository.FavouriteRepository;
+import dist_system.movie_app.repository.UserMovieRepository;
+import dist_system.movie_app.repository.UserRepository;
+import dist_system.movie_app.user.FavouriteMovie;
+import dist_system.movie_app.user.User;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class FavouriteService {
-    public String saveFavourite(String id, String movie, String userId) {
-        try {
-            System.out.println("Saved favourite: " + movie + " id: " + id + "\nFor user with id: " + userId);
+
+    private final UserRepository userRepository;
+    private final UserMovieRepository userMovieRepository;
+    private final FavouriteRepository favouriteRepository;
+
+    public FavouriteService(UserRepository userRepository, UserMovieRepository userMovieRepository, FavouriteRepository favouriteRepository) {
+        this.userRepository = userRepository;
+        this.userMovieRepository = userMovieRepository;
+        this.favouriteRepository = favouriteRepository;
+    }
+
+    public String saveFavourite(String movieName, String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            FavouriteMovie favouriteMovie = FavouriteMovie.builder()
+                    .username(username)
+                    .movieName(movieName)
+                    .build();
+            favouriteRepository.save(favouriteMovie);
             return "Favourite saved";
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } else {
+            return null;
         }
     }
 
-    public String deleteFavourite(String movie, String userId) {
-        //add check for movie existence in fav list table in db and return error if not found
-
-        try {
-            System.out.println("Deleted favourite: " + movie + "\nFor user with id: " + userId);
+    public String deleteFavourite(String id, String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            favouriteRepository.deleteById(id);
             return "Favourite deleted";
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } else {
+            return null;
         }
     }
 
-    public String getAllFavourites(String userId) {
-        //add check for user existence in users table in db and return error if not found
-
-        try {
-            System.out.println("Getting all favourites for user with id: " + userId);
-            return "All favourites for user with id: " + userId + " returned";
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public List<FavouriteMovie> getAllFavourites(User user) {
+        return favouriteRepository.findAllByUsername(user.getUsername());
     }
 }
