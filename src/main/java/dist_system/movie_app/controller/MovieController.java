@@ -1,11 +1,13 @@
 package dist_system.movie_app.controller;
 
+import dist_system.movie_app.dto.RatingRequest;
 import dist_system.movie_app.dto.ReviewRequest;
 import dist_system.movie_app.model.BaseResponse;
 import dist_system.movie_app.service.MovieService;
 import dist_system.movie_app.user.User;
 import dist_system.movie_app.user.UserMovie;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
@@ -38,16 +40,22 @@ public class MovieController {
         return new BaseResponse<>(true, "Movies has been listed", movieService.getAllMovies(user.getUsername()));
     }
 
-    // get ratings for movie with id
-    @GetMapping("/{id}/ratings")
-    public String getRatingsForMovie(@PathVariable String id) {
-        return "Ratings for movie with id: " + id;
+    @PostMapping("/{id}/rating")
+    public BaseResponse<String> addRating(@PathVariable String id, @RequestBody RatingRequest request, @AuthenticationPrincipal User user) {
+        String response = movieService.addRating(id, request.getRating(), user.getUsername());
+        if (response == null) {
+            return new BaseResponse<>(false, "An unkown error occured", null);
+        }
+        return new BaseResponse<>(true, "success", response);
     }
 
-    // for adding movie rating
-    @PostMapping("/addRating")
-    public String addRating() {
-        return "Rating added";
+    @GetMapping("/{id}/rating")
+    public BaseResponse<Float> getRating(@PathVariable String id) {
+        Object response = movieService.getRating(id);
+        if (response == null) {
+            return new BaseResponse<>(false, "Movie not found", null);
+        }
+        return new BaseResponse<>(true, "success", (Float) response);
     }
 
     // for adding movie to user

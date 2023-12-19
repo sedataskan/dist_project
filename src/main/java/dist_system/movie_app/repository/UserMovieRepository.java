@@ -13,6 +13,8 @@ public interface UserMovieRepository extends JpaRepository<UserMovie, String> {
 
     boolean existsByUsernameAndMovieName(String username, String movieName);
 
+
+
     // Find all by username
     List<UserMovie> findAllByUsername(String username);
 

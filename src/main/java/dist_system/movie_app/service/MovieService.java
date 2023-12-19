@@ -106,5 +106,32 @@ public class MovieService {
         System.out.println("Added review for movie with id: " + id + "\nReview: " + review);
         return "Review added";
     }
+
+    public String addRating(String id, Float rating, String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            // Check userMovieRepo for movie with id
+            // If exists, update rating
+            if (userMovieRepository.existsById(id)) {
+                UserMovie userMovie = userMovieRepository.findById(id).get();
+                userMovie.setRating(rating);
+                userMovieRepository.save(userMovie);
+                return "Rating updated";
+            } else {
+                return "Movie not found";
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public Object getRating(String id) {
+        Optional<UserMovie> userMovie = userMovieRepository.findById(id);
+        if (userMovie.isPresent()) {
+            return userMovie.get().getRating();
+        } else {
+            return null;
+        }
+    }
 }
 

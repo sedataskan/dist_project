@@ -19,5 +19,6 @@ public class UserMovie {
 
     private String username;
     private String movieName;
-
+    private Float rating;
+    private String review;
 }
