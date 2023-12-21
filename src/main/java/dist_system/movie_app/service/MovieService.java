@@ -1,8 +1,9 @@
 package dist_system.movie_app.service;
 
-import dist_system.movie_app.model.BaseResponse;
+import dist_system.movie_app.repository.MovieRepository;
 import dist_system.movie_app.repository.UserRepository;
 import dist_system.movie_app.repository.UserMovieRepository;
+import dist_system.movie_app.user.Movie;
 import dist_system.movie_app.user.User;
 import dist_system.movie_app.user.UserMovie;
 import org.json.JSONArray;
@@ -18,7 +19,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-import java.sql.Array;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,37 +31,50 @@ public class MovieService {
 
     private final UserRepository userRepository;
     private final UserMovieRepository userMovieRepository;
+    private final MovieRepository movieRepository;
 
-    public MovieService(UserRepository userRepository, UserMovieRepository userMovieRepository) {
+    public MovieService(UserRepository userRepository, UserMovieRepository userMovieRepository, MovieRepository movieRepository) {
         this.userRepository = userRepository;
         this.userMovieRepository = userMovieRepository;
+        this.movieRepository = movieRepository;
     }
 
-    public String getMovieById(String id) throws IOException, InterruptedException, JSONException {
+    public void saveMovieToDB() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.themoviedb.org/3/keyword/" + id + "/movies"))
+                .uri(URI.create("https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1"))
                 .header("accept", "application/json")
                 .header("Authorization", "Bearer " + apiKey)
                 .method("GET", HttpRequest.BodyPublishers.noBody())
                 .build();
-
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
-        // Parse JSON response
-        JSONObject jsonResponse = new JSONObject(response.body());
+        System.out.println(response.body());
 
-        // Extract movie information
-        if (jsonResponse.has("results")) {
-            JSONArray resultsArray = jsonResponse.getJSONArray("results");
-            JSONObject firstResult = resultsArray.getJSONObject(0);
-            String movieTitle = firstResult.getString("original_title");
-            System.out.println("Got movie by this id: " + id + movieTitle);
-            return movieTitle;
+        JSONObject jsonObject = new JSONObject(response.body());
+        JSONArray jsonArray = jsonObject.getJSONArray("results");
+        if (jsonArray != null) {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject movie = jsonArray.getJSONObject(i);
+                movieRepository.save(Movie
+                        .builder()
+                        .movieName(movie.getString("title"))
+                        .rating((float) movie.getDouble("vote_average"))
+                        .build());
+            }
         }
-        return null;
     }
 
-    public String saveMovie(String movieId, String username) throws IOException, InterruptedException {
+    public String getMovieById(int id) throws IOException, InterruptedException, JSONException {
+        Optional<Movie> movie = movieRepository.findById(id);
+        if (movie.isPresent()) {
+            System.out.println("Movie found in database: " + movie.get().getMovieName());
+            return movie.get().getMovieName();
+        } else {
+            return "Movie not found";
+        }
+    }
+
+    public String saveMovie(int movieId, String username) throws IOException, InterruptedException {
 
         Optional<User> user = userRepository.findByUsername(username);
         String movie = getMovieById(movieId);
@@ -71,7 +84,9 @@ public class MovieService {
         //save movie to user_movie table in database
         if (user.isPresent() && movie != null) {
             if (!userMovieRepository.existsByUsernameAndMovieName(user.get().getUsername(), movie)) {
-                UserMovie userMovie = UserMovie.builder()
+                UserMovie userMovie = UserMovie
+                        .builder()
+                        .movieId(movieId)
                         .username(user.get().getUsername())
                         .movieName(movie)
                         .build();
@@ -81,72 +96,85 @@ public class MovieService {
             }
             return "Movie already saved";
         }
-        return null;
+        return "Movie not found";
     }
 
-    public String deleteMovie(String movie, String username) {
+    public String deleteMovie(int movie, String username) throws IOException, InterruptedException {
         Optional<User> user = userRepository.findByUsername(username);
+        String movieName = getMovieById(movie);
         if (user.isPresent()) {
-            userMovieRepository.deleteById(movie);
-            return "Movie deleted";
-        } else {
-            return null;
+            if (userMovieRepository.existsByUsernameAndMovieName(user.get().getUsername(), movieName)) {
+                userMovieRepository. deleteByMovieIdAndUsername(movie, username);
+                return "Movie deleted";
+            }
+            return "Movie not found";
         }
+        return "Movie not found";
     }
     public List<UserMovie> getAllMovies(String username) {
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isPresent()) {
             return userMovieRepository.findAllByUsername(username);
-        } else {
-            return null;
         }
+        return null;
     }
 
-    public String addReview(String id, String review) {
-        Optional<UserMovie> userMovie = userMovieRepository.findById(id);
-        if (userMovie.isPresent()) {
-            userMovie.get().setReview(review);
-            userMovieRepository.save(userMovie.get());
-            return "Review added";
-        } else {
-            return null;
-        }
-    }
-
-    public String getReview(String id) {
-        Optional<UserMovie> userMovie = userMovieRepository.findById(id);
-        if (userMovie.isPresent()) {
-            return userMovie.get().getReview();
-        } else {
-            return null;
-        }
-    }
-
-    public String addRating(String id, Float rating, String username) {
+    public String addReview(int id, String review, String username) {
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isPresent()) {
             // Check userMovieRepo for movie with id
             // If exists, update rating
-            if (userMovieRepository.existsById(id)) {
-                UserMovie userMovie = userMovieRepository.findById(id).get();
+            if (userMovieRepository.existsByUsernameAndMovieId(username, id)) {
+                UserMovie userMovie = userMovieRepository.findByUsernameAndMovieId(username, id);
+                userMovie.setReview(review);
+                userMovieRepository.save(userMovie);
+                return "Review updated";
+            } else {
+                return "Movie not found";
+            }
+        }
+        return "User not found";
+    }
+
+    public String getReview(int id, String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            UserMovie userMovie = userMovieRepository.findByUsernameAndMovieId(username, id);
+            if (userMovie != null) {
+                return userMovie.getReview();
+            }
+            return "Movie not found";
+        }
+        return "User not found";
+    }
+
+    public String addRating(int id, Float rating, String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            // Check userMovieRepo for movie with id
+            // If exists, update rating
+            if (userMovieRepository.existsByUsernameAndMovieId(username, id)) {
+                UserMovie userMovie = userMovieRepository.findByUsernameAndMovieId(username, id);
                 userMovie.setRating(rating);
                 userMovieRepository.save(userMovie);
                 return "Rating updated";
             } else {
                 return "Movie not found";
             }
-        } else {
-            return null;
         }
+        return "User not found";
     }
 
-    public Object getRating(String id) {
-        Optional<UserMovie> userMovie = userMovieRepository.findById(id);
-        if (userMovie.isPresent()) {
-            return userMovie.get().getRating();
-        } else {
-            return null;
+    public Object getRating(int id, String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            UserMovie userMovie = userMovieRepository.findByUsernameAndMovieId(username, id);
+            if (userMovie != null) {
+                return userMovie.getRating();
+            }
+            return "Movie not found";
         }
+        return "User not found";
     }
 }
 

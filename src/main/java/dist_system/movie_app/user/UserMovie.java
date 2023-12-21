@@ -17,6 +17,7 @@ public class UserMovie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    private int movieId;
     private String username;
     private String movieName;
     private Float rating;

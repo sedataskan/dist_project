@@ -1,6 +1,5 @@
 package dist_system.movie_app.controller;
 
-import dist_system.movie_app.dto.FavouriteRequest;
 import dist_system.movie_app.model.BaseResponse;
 import dist_system.movie_app.service.FavouriteService;
 import dist_system.movie_app.service.MovieService;
@@ -26,10 +25,10 @@ public class FavouriteController {
 
     // adding movie to fav list
     @PostMapping("/{movieID}")
-    public BaseResponse<String> addFavourite(@PathVariable String movieID, @AuthenticationPrincipal User user){
+    public BaseResponse<String> addFavourite(@PathVariable int movieID, @AuthenticationPrincipal User user){
         try {
             String movie = movieService.getMovieById(movieID);
-            String response = favouriteService.saveFavourite(movie, user.getUsername());
+            String response = favouriteService.saveFavourite(movieID, movie, user.getUsername());
             if (response == null) {
                 return new BaseResponse<>(false, "An unkown error occured", null);
             } else {
@@ -42,7 +41,7 @@ public class FavouriteController {
 
     // deleting movie from fav list
     @DeleteMapping("/{id}")
-    public BaseResponse<String> deleteFavourite(@PathVariable String id, @AuthenticationPrincipal User user){
+    public BaseResponse<String> deleteFavourite(@PathVariable int id, @AuthenticationPrincipal User user){
         String response = favouriteService.deleteFavourite(id, user.getUsername());
         if (response == null) {
             return new BaseResponse<>(false, "An unkown error occured", null);
@@ -51,8 +50,12 @@ public class FavouriteController {
     }
 
     // get all fav list
-    @GetMapping("/all/")
+    @GetMapping("/all")
     public BaseResponse<List<FavouriteMovie>> getAllFavourites(@AuthenticationPrincipal User user) {
-        return new BaseResponse<>(true, "Favourites has been listed", favouriteService.getAllFavourites(user));
+        List<FavouriteMovie> response = favouriteService.getAllFavourites(user.getUsername());
+        if (response == null) {
+            return new BaseResponse<>(false, "Favourites has not been listed", null);
+        }
+        return new BaseResponse<>(true, "success", response);
     }
 }

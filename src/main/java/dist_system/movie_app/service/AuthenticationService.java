@@ -1,8 +1,8 @@
 package dist_system.movie_app.service;
 
-import dist_system.movie_app.dto.AuthenticationResponse;
 import dist_system.movie_app.dto.LoginRequest;
 import dist_system.movie_app.dto.RegisterRequest;
+import dist_system.movie_app.model.BaseResponse;
 import dist_system.movie_app.repository.UserRepository;
 import dist_system.movie_app.user.Role;
 import dist_system.movie_app.user.User;
@@ -21,7 +21,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse register(RegisterRequest registerRequest) {
+    public BaseResponse register(RegisterRequest registerRequest) {
         //check if user exists
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
             //throw exception in console
@@ -40,14 +40,13 @@ public class AuthenticationService {
             //generate token
             var jwtToken = jwtService.generateToken(user);
             //return token
-            return AuthenticationResponse
+            return BaseResponse
                     .builder()
-                    .accessToken(jwtToken)
                     .build();
         }
     }
 
-    public AuthenticationResponse login(LoginRequest loginRequest) {
+    public String login(LoginRequest loginRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequest.getUsername(),
                 loginRequest.getPassword()
@@ -55,10 +54,6 @@ public class AuthenticationService {
         );
         var user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse
-                .builder()
-                .accessToken(jwtToken)
-                .build();
+        return jwtService.generateToken(user);
     }
 }
