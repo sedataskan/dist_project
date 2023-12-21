@@ -1,10 +1,14 @@
 package dist_system.movie_app.model;
 
+import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 
 @Data
+@Builder
 public class BaseResponse<T> {
     private final Boolean status;
+    @Getter
     private final String message;
     private final T payload;
 
@@ -12,9 +16,5 @@ public class BaseResponse<T> {
         this.status = status;
         this.message = message;
         this.payload = payload;
-    }
-
-    public String getMessage() {
-        return message;
     }
 }
