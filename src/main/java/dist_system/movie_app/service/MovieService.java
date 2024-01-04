@@ -48,8 +48,6 @@ public class MovieService {
                 .build();
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
-        System.out.println(response.body());
-
         JSONObject jsonObject = new JSONObject(response.body());
         JSONArray jsonArray = jsonObject.getJSONArray("results");
         if (jsonArray != null) {
